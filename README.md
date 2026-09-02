@@ -97,15 +97,39 @@ la tabla. Se optó por dos GSIs:
 
 ### Por qué `TransactionRepository` vive en `domain/`
 
-La interfaz del repositorio se declara en `domain/` y no en
-`repository/dynamo/` seguía el principio de **Dependency Inversion**: el
-dominio (y el `TransactionService`, que depende de esta interfaz) no debe
-conocer que la persistencia es DynamoDB. `DynamoTransactionRepository`
-(en `repository/dynamo/`) es un detalle de infraestructura que implementa
-el contrato que el dominio define, no al revés. Esto permite, por ejemplo,
-reemplazar DynamoDB por otro motor de persistencia sin tocar el dominio ni
-el service, y facilita testear `TransactionServiceImpl` con un mock de la
-interfaz sin levantar infraestructura real.
+```mermaid
+flowchart LR
+    subgraph controller
+        TC[TransactionController]
+    end
+    subgraph service
+        TS[TransactionServiceImpl]
+    end
+    subgraph domain
+        TR[["TransactionRepository «interface»"]]
+    end
+    subgraph "repository/dynamo"
+        DTR[DynamoTransactionRepository]
+    end
+    DDB[(DynamoDB / LocalStack)]
+
+    TC --> TS
+    TS --> TR
+    DTR -. implements .-> TR
+    DTR --> DDB
+```
+
+La flecha de dependencia va de `service` hacia la interfaz en `domain`, y
+`DynamoTransactionRepository` apunta hacia esa misma interfaz para
+implementarla — el dominio nunca apunta hacia `repository/dynamo`. Esto
+sigue el principio de **Dependency Inversion**: el dominio (y el
+`TransactionService`, que depende de esta interfaz) no debe conocer que la
+persistencia es DynamoDB; `DynamoTransactionRepository` es un detalle de
+infraestructura que implementa el contrato que el dominio define, no al
+revés. Esto permite, por ejemplo, reemplazar DynamoDB por otro motor de
+persistencia sin tocar el dominio ni el service, y facilita testear
+`TransactionServiceImpl` con un mock de la interfaz sin levantar
+infraestructura real.
 
 ### `parent_id` huérfano
 
