@@ -1,0 +1,7 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+if ! mvn spotless:check -q; then
+  echo "Spotless found formatting violations. Run 'mvn spotless:apply' and commit again." >&2
+  exit 1
+fi
