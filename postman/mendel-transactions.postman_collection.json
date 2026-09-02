@@ -1,0 +1,204 @@
+{
+  "info": {
+    "name": "Mendel Transactions",
+    "description": "PUT/GET de transacciones con suma transitiva de descendientes. Correr `docker-compose up` antes de usar esta colección.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://localhost:8080",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "PDF example (10 -> 11 -> 12)",
+      "item": [
+        {
+          "name": "PUT 10 (cars, root)",
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"amount\": 5000,\n  \"type\": \"cars\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/transactions/10",
+              "host": ["{{base_url}}"],
+              "path": ["transactions", "10"]
+            }
+          }
+        },
+        {
+          "name": "PUT 11 (shopping, parent_id=10)",
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"amount\": 10000,\n  \"type\": \"shopping\",\n  \"parent_id\": 10\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/transactions/11",
+              "host": ["{{base_url}}"],
+              "path": ["transactions", "11"]
+            }
+          }
+        },
+        {
+          "name": "PUT 12 (shopping, parent_id=11)",
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"amount\": 5000,\n  \"type\": \"shopping\",\n  \"parent_id\": 11\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/transactions/12",
+              "host": ["{{base_url}}"],
+              "path": ["transactions", "12"]
+            }
+          }
+        },
+        {
+          "name": "GET types/cars -> [10]",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/transactions/types/cars",
+              "host": ["{{base_url}}"],
+              "path": ["transactions", "types", "cars"]
+            }
+          }
+        },
+        {
+          "name": "GET sum/10 -> 20000 (subtree completo)",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/transactions/sum/10",
+              "host": ["{{base_url}}"],
+              "path": ["transactions", "sum", "10"]
+            }
+          }
+        },
+        {
+          "name": "GET sum/11 -> 15000 (sin el padre)",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/transactions/sum/11",
+              "host": ["{{base_url}}"],
+              "path": ["transactions", "sum", "11"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Edge cases",
+      "item": [
+        {
+          "name": "PUT 20 con parent_id huerfano (999999)",
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"amount\": 300,\n  \"type\": \"misc\",\n  \"parent_id\": 999999\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/transactions/20",
+              "host": ["{{base_url}}"],
+              "path": ["transactions", "20"]
+            }
+          }
+        },
+        {
+          "name": "GET sum/20 -> 300 (solo el nodo, padre no existe)",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/transactions/sum/20",
+              "host": ["{{base_url}}"],
+              "path": ["transactions", "sum", "20"]
+            }
+          }
+        },
+        {
+          "name": "GET sum/999999 -> 404 (padre nunca existio)",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/transactions/sum/999999",
+              "host": ["{{base_url}}"],
+              "path": ["transactions", "sum", "999999"]
+            }
+          }
+        },
+        {
+          "name": "PUT 30 y 31 con referencia ciclica",
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"amount\": 100,\n  \"type\": \"a\",\n  \"parent_id\": 31\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/transactions/30",
+              "host": ["{{base_url}}"],
+              "path": ["transactions", "30"]
+            }
+          }
+        },
+        {
+          "name": "PUT 31 (cierra el ciclo con 30)",
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"amount\": 50,\n  \"type\": \"b\",\n  \"parent_id\": 30\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/transactions/31",
+              "host": ["{{base_url}}"],
+              "path": ["transactions", "31"]
+            }
+          }
+        },
+        {
+          "name": "GET sum/30 -> 150 (no cuelga con el ciclo)",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/transactions/sum/30",
+              "host": ["{{base_url}}"],
+              "path": ["transactions", "sum", "30"]
+            }
+          }
+        },
+        {
+          "name": "PUT sin type -> 400 (validation)",
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"amount\": 5000\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/transactions/40",
+              "host": ["{{base_url}}"],
+              "path": ["transactions", "40"]
+            }
+          }
+        }
+      ]
+    }
+  ]
+}
