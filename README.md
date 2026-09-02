@@ -4,6 +4,22 @@ Servicio REST en Spring Boot que almacena transacciones (tipo + monto), las
 vincula entre sí vía `parent_id`, y calcula la suma transitiva de todas las
 transacciones conectadas (descendientes) a una transacción dada.
 
+## Requisitos
+
+Para levantar la app con `docker-compose` (la forma recomendada, no hace
+falta nada más):
+
+- Docker y Docker Compose (v2, el que trae `docker compose`).
+
+Para correr `mvn test` o compilar fuera de Docker hace falta además:
+
+- Java 17.
+- Maven.
+
+No hace falta AWS CLI para nada de lo anterior; solo es útil si querés
+inspeccionar directamente el contenido de la tabla en LocalStack (ver más
+abajo).
+
 ## Cómo levantar todo
 
 ```bash
@@ -13,6 +29,10 @@ docker-compose up --build
 Esto levanta LocalStack (DynamoDB) y la aplicación en `http://localhost:8080`.
 La tabla `transactions` y sus índices secundarios (`type-index`,
 `parent-index`) se crean automáticamente al arrancar la app si no existen.
+
+Para pararlo: `docker compose down`. Si el puerto 8080 ya está ocupado por
+otro proceso en tu máquina, hay que liberarlo antes (la app no tiene una
+variable de entorno para cambiar el puerto en este challenge).
 
 Endpoints:
 
