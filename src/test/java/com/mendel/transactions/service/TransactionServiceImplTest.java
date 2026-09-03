@@ -30,7 +30,7 @@ class TransactionServiceImplTest {
   }
 
   @Test
-  void upsertSavesTransactionBuiltFromArguments() {
+  void shouldSaveTransactionBuiltFromArguments() {
     underTest.upsert(10L, 5000.0, "cars", null);
 
     ArgumentCaptor<Transaction> captor = ArgumentCaptor.forClass(Transaction.class);
@@ -39,21 +39,21 @@ class TransactionServiceImplTest {
   }
 
   @Test
-  void findIdsByTypeDelegatesToRepository() {
+  void shouldReturnIdsFromRepositoryWhenFindingByType() {
     when(repository.findIdsByType("cars")).thenReturn(List.of(10L));
 
     assertThat(underTest.findIdsByType("cars")).containsExactly(10L);
   }
 
   @Test
-  void sumOfThrowsNotFoundWhenTransactionDoesNotExist() {
+  void shouldThrowNotFoundWhenTransactionDoesNotExist() {
     when(repository.findById(99L)).thenReturn(Optional.empty());
 
     assertThatThrownBy(() -> underTest.sumOf(99L)).isInstanceOf(TransactionNotFoundException.class);
   }
 
   @Test
-  void sumOfMatchesPdfExample() {
+  void shouldReturnSumsMatchingThePdfExample() {
     Transaction t10 = new Transaction(10L, 5000, "cars", null);
     Transaction t11 = new Transaction(11L, 10000, "shopping", 10L);
     Transaction t12 = new Transaction(12L, 5000, "shopping", 11L);
@@ -69,7 +69,7 @@ class TransactionServiceImplTest {
   }
 
   @Test
-  void sumOfDoesNotLoopForeverOnCyclicReference() {
+  void shouldReturnSumWithoutLoopingOnCyclicReference() {
     Transaction t1 = new Transaction(1L, 100, "a", null);
     Transaction t2 = new Transaction(2L, 50, "b", 1L);
 
