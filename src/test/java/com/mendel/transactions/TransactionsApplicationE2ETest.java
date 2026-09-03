@@ -42,7 +42,7 @@ class TransactionsApplicationE2ETest {
   @Autowired private MockMvc mockMvc;
 
   @Test
-  void pdfExampleSumsTheDescendantSubtreeNotTheParent() throws Exception {
+  void shouldSumTheDescendantSubtreeNotTheParent() throws Exception {
     putTransaction(10, "{\"amount\": 5000, \"type\": \"cars\"}");
     putTransaction(11, "{\"amount\": 10000, \"type\": \"shopping\", \"parent_id\": 10}");
     putTransaction(12, "{\"amount\": 5000, \"type\": \"shopping\", \"parent_id\": 11}");
@@ -64,7 +64,7 @@ class TransactionsApplicationE2ETest {
   }
 
   @Test
-  void orphanParentIdIsAcceptedAndSumsOnlyItself() throws Exception {
+  void shouldAcceptOrphanParentIdAndSumOnlyItself() throws Exception {
     putTransaction(20, "{\"amount\": 300, \"type\": \"misc\", \"parent_id\": 999999}");
 
     mockMvc
@@ -76,7 +76,7 @@ class TransactionsApplicationE2ETest {
   }
 
   @Test
-  void cyclicParentReferenceDoesNotHangAndSumsEachNodeOnce() throws Exception {
+  void shouldSumEachNodeOnceWithoutHangingOnCyclicReference() throws Exception {
     putTransaction(30, "{\"amount\": 100, \"type\": \"a\", \"parent_id\": 31}");
     putTransaction(31, "{\"amount\": 50, \"type\": \"b\", \"parent_id\": 30}");
 

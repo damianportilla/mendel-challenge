@@ -104,7 +104,7 @@ class DynamoTransactionRepositoryTest {
   }
 
   @Test
-  void savesAndFindsATransactionById() {
+  void shouldSaveAndFindATransactionById() {
     repository.save(new Transaction(10L, 5000.0, "cars", null));
 
     Optional<Transaction> found = repository.findById(10L);
@@ -113,12 +113,12 @@ class DynamoTransactionRepositoryTest {
   }
 
   @Test
-  void findByIdReturnsEmptyForUnknownId() {
+  void shouldReturnEmptyForUnknownId() {
     assertThat(repository.findById(123456789L)).isEmpty();
   }
 
   @Test
-  void upsertReplacesAnExistingTransaction() {
+  void shouldReplaceAnExistingTransactionOnUpsert() {
     repository.save(new Transaction(20L, 100.0, "food", null));
     repository.save(new Transaction(20L, 200.0, "shopping", 99L));
 
@@ -126,7 +126,7 @@ class DynamoTransactionRepositoryTest {
   }
 
   @Test
-  void findIdsByTypeReturnsOnlyMatchingIds() {
+  void shouldReturnOnlyMatchingIdsByType() {
     repository.save(new Transaction(30L, 5000.0, "cars", null));
     repository.save(new Transaction(31L, 100.0, "food", null));
 
@@ -134,7 +134,7 @@ class DynamoTransactionRepositoryTest {
   }
 
   @Test
-  void findChildrenOfReturnsDirectChildrenWithAmounts() {
+  void shouldReturnDirectChildrenWithAmounts() {
     repository.save(new Transaction(40L, 5000.0, "cars", null));
     repository.save(new Transaction(41L, 10000.0, "shopping", 40L));
     repository.save(new Transaction(42L, 5000.0, "shopping", 41L));
@@ -145,7 +145,7 @@ class DynamoTransactionRepositoryTest {
   }
 
   @Test
-  void findChildrenOfSupportsOrphanParentReferences() {
+  void shouldSupportOrphanParentReferences() {
     repository.save(new Transaction(50L, 250.0, "misc", 999999L));
 
     assertThat(repository.findChildrenOf(999999L))

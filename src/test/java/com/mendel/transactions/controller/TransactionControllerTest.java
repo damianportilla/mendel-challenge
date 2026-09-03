@@ -31,7 +31,7 @@ class TransactionControllerTest {
   @MockBean private TransactionService service;
 
   @Test
-  void putUpsertsTransactionAndReturnsOk() throws Exception {
+  void shouldUpsertTransactionAndReturnOk() throws Exception {
     mockMvc
         .perform(
             put("/transactions/10")
@@ -43,7 +43,7 @@ class TransactionControllerTest {
   }
 
   @Test
-  void putReadsSnakeCaseParentId() throws Exception {
+  void shouldReadSnakeCaseParentId() throws Exception {
     mockMvc
         .perform(
             put("/transactions/11")
@@ -57,7 +57,7 @@ class TransactionControllerTest {
   }
 
   @Test
-  void putWithoutTypeReturns400() throws Exception {
+  void shouldReturn400WhenTypeIsMissing() throws Exception {
     mockMvc
         .perform(
             put("/transactions/10")
@@ -67,7 +67,7 @@ class TransactionControllerTest {
   }
 
   @Test
-  void getTypesReturnsBareJsonArrayOfIds() throws Exception {
+  void shouldReturnBareJsonArrayOfIds() throws Exception {
     when(service.findIdsByType("cars")).thenReturn(List.of(10L));
 
     mockMvc
@@ -77,7 +77,7 @@ class TransactionControllerTest {
   }
 
   @Test
-  void getSumReturnsSumObject() throws Exception {
+  void shouldReturnSumObject() throws Exception {
     when(service.sumOf(10L)).thenReturn(20000.0);
 
     mockMvc
@@ -87,14 +87,14 @@ class TransactionControllerTest {
   }
 
   @Test
-  void getSumForUnknownIdReturns404() throws Exception {
+  void shouldReturn404ForUnknownId() throws Exception {
     when(service.sumOf(99L)).thenThrow(new TransactionNotFoundException(99L));
 
     mockMvc.perform(get("/transactions/sum/99")).andExpect(status().isNotFound());
   }
 
   @Test
-  void getSumReturns503WhenDynamoDbFailsInsteadOfLeakingAStackTrace() throws Exception {
+  void shouldReturn503WhenDynamoDbFailsInsteadOfLeakingAStackTrace() throws Exception {
     when(service.sumOf(10L)).thenThrow(SdkClientException.create("connection reset"));
 
     mockMvc
