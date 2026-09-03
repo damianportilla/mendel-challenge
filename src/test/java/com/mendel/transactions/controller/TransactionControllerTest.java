@@ -20,6 +20,7 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
+import software.amazon.awssdk.core.exception.SdkClientException;
 
 @WebMvcTest(TransactionController.class)
 class TransactionControllerTest {
@@ -90,5 +91,16 @@ class TransactionControllerTest {
     when(service.sumOf(99L)).thenThrow(new TransactionNotFoundException(99L));
 
     mockMvc.perform(get("/transactions/sum/99")).andExpect(status().isNotFound());
+  }
+
+  @Test
+  void getSumReturns503WhenDynamoDbFailsInsteadOfLeakingAStackTrace() throws Exception {
+    when(service.sumOf(10L)).thenThrow(SdkClientException.create("connection reset"));
+
+    mockMvc
+        .perform(get("/transactions/sum/10"))
+        .andExpect(status().isServiceUnavailable())
+        .andExpect(jsonPath("$.code").value("STORAGE_UNAVAILABLE"))
+        .andExpect(jsonPath("$.message").value("The storage backend is unavailable"));
   }
 }

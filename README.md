@@ -178,3 +178,14 @@ exactamente una vez, incluso ante un ciclo.
 `404 Not Found` (vía `TransactionNotFoundException`), tratándolo como un
 recurso que no existe — semántica REST estándar, distinta de los errores de
 negocio genéricos (`DomainException` → `422`).
+
+### Fallas de DynamoDB (`SdkException` → `503`)
+
+Si la llamada al SDK de AWS falla (DynamoDB no disponible, timeout, error del
+lado del servicio), `GlobalExceptionHandler` la mapea a `503 Service
+Unavailable` con un body tipado (`STORAGE_UNAVAILABLE`), y loguea la
+excepción completa del lado del servidor. Sin este handler, esa excepción
+no controlada llegaba al cliente como un `500` genérico de Spring con stack
+trace — se detectó corriendo una prueba de carga concurrente agresiva contra
+LocalStack, que hizo que sus índices empezaran a devolver `InternalError` en
+las Queries.
